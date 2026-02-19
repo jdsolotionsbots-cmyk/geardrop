@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GearDrop | Driver</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/public/style.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <img src="/public/logo.png" alt="GearDrop" style="height: 35px;">
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <button id="btn-profile" class="btn-text"><i class="fas fa-user-circle" style="font-size:1.5rem;"></i></button>
+            <button id="btn-logout" class="btn-text" title="Logout"><i class="fas fa-sign-out-alt" style="font-size:1.5rem;"></i></button>
+        </div>
+    </nav>
+
+    <div id="driver-pending-view" style="display: none; text-align: center; padding: 100px 20px;">
+        <i class="fas fa-shield-alt" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
+        <h2>Account Pending</h2>
+        <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto 30px auto;">Your profile is currently under review by the Admin. Please upload your license if you haven't already.</p>
+        <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 30px; border-radius: 12px; max-width: 400px; margin: 0 auto;">
+            <input type="file" id="license-upload" accept="image/*" style="display:none;">
+            <button id="btn-upload-license" class="btn btn-primary full-width"><i class="fas fa-camera"></i> Upload License Photo</button>
+            <p id="upload-status" style="margin-top: 15px; font-size: 0.9rem; color: #4CAF50;"></p>
+        </div>
+    </div>
+
+    <div id="driver-active-view" style="display: none; padding: 30px; max-width: 800px; margin: 0 auto;">
+        <h2>Available Routes</h2>
+        <div id="driver-live-list"></div>
+    </div>
+
+    <button id="chat-fab" class="chat-fab" style="display:none;"><i class="fas fa-comment-dots"></i></button>
+
+    <div id="profile-modal" class="modal-overlay"></div>
+    <div id="chat-modal" class="modal-overlay"></div>
+
+    <script type="module" src="/src/controllers/driverApp.js"></script>
+</body>
+</html>

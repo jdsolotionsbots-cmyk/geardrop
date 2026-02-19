@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GearDrop | Shop</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/public/style.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <img src="/public/logo.png" alt="GearDrop" style="height: 35px;">
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <button id="btn-profile" class="btn-text"><i class="fas fa-user-circle" style="font-size:1.5rem;"></i></button>
+            <button id="btn-logout" class="btn-text" title="Logout"><i class="fas fa-sign-out-alt" style="font-size:1.5rem;"></i></button>
+        </div>
+    </nav>
+
+    <div class="split-layout">
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+
+        <div class="side-panel">
+            <h2 style="margin-top:0;">Request Route</h2>
+            <h1 id="live-price" style="color: var(--primary); font-size: 2.5rem; margin: 10px 0;">$0.00</h1>
+            
+            <select id="schedule-time" class="input-dark">
+                <option value="now">Deliver ASAP (Now)</option>
+                <option value="08:00">Tomorrow Morning (8:00 AM)</option>
+            </select>
+
+            <div id="stops-container">
+                <div class="stop-entry" style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid var(--primary);">
+                    <small style="color:var(--primary); font-weight:bold;">STOP 1 (PICKUP)</small>
+                    <input type="text" placeholder="Address..." class="input-dark stop-address" style="margin-top:10px;">
+                    <input type="text" placeholder="Part Details / PO#" class="input-dark stop-details" style="margin-bottom:0;">
+                </div>
+            </div>
+
+            <button id="btn-add-stop" class="btn-text full-width" style="margin-bottom: 20px; text-align: left; color: var(--primary);">
+                <i class="fas fa-plus"></i> Add Another Stop
+            </button>
+            
+            <button id="btn-confirm-route" class="btn btn-primary full-width">Confirm Route</button>
+            <div id="order-status-banner" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="/src/controllers/dealerApp.js"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GearDrop | Logistics</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/public/style.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <img src="/public/logo.png" alt="GearDrop" style="height: 35px;">
+    </nav>
+
+    <header style="text-align: center; padding: 100px 20px; max-width: 900px; margin: 0 auto;">
+        <h1 style="font-size: 4rem; margin-bottom: 10px; font-weight: 800; letter-spacing: -1px;">
+            Parts. Delivered. <span style="color: var(--primary);">Fast.</span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.2rem; margin-bottom: 60px;">The logistics backbone for the modern mechanic.</p>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
+            <div style="background: var(--bg-card); padding: 40px; border-radius: 16px; flex: 1; min-width: 280px; border: 1px solid var(--border);">
+                <i class="fas fa-wrench" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 20px;"></i>
+                <h3 style="margin-bottom: 20px;">I Need Parts</h3>
+                <button id="btn-login-dealer" class="btn full-width">
+                    <i class="fab fa-google" style="color: #DB4437;"></i> Login as Shop
+                </button>
+            </div>
+            
+            <div style="background: var(--bg-card); padding: 40px; border-radius: 16px; flex: 1; min-width: 280px; border: 1px solid var(--primary);">
+                <i class="fas fa-car-side" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 20px;"></i>
+                <h3 style="margin-bottom: 20px;">I'm a Driver</h3>
+                <button id="btn-login-driver" class="btn full-width">
+                    <i class="fab fa-google" style="color: #DB4437;"></i> Sign Up to Drive
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <script type="module" src="/src/controllers/indexApp.js"></script>
+</body>
+</html>

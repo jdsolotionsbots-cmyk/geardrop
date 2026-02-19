@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GearDrop - Admin Console</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/public/style.css">
+</head>
+<body style="background: var(--bg-dark); padding: 30px; overflow-y: auto;">
+
+    <div style="display:flex; justify-content:space-between; margin-bottom: 30px;">
+        <h1 style="margin:0;">Admin Console</h1>
+        <button id="btn-logout" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Secure Logout</button>
+    </div>
+
+    <div id="admin-report-section" style="background: var(--bg-card); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid var(--border);">
+        <h3>Monthly Financials</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
+            <div><small style="color:var(--text-muted);">GROSS</small><h2 id="rep-gross">$0.00</h2></div>
+            <div><small style="color:var(--text-muted);">HST (13%)</small><h2 id="rep-hst" style="color:var(--primary);">$0.00</h2></div>
+            <div><small style="color:var(--text-muted);">NET PROFIT</small><h2 id="rep-net" style="color:#2196F3;">$0.00</h2></div>
+        </div>
+    </div>
+
+    <div id="admin-driver-approvals" style="margin-bottom: 20px;"></div>
+    
+    <div id="admin-schedule-list" style="margin-bottom: 20px;"></div>
+
+    <script type="module" src="/src/controllers/adminApp.js"></script>
+</body>
+</html>
