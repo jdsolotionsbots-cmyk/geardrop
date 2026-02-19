@@ -2,12 +2,12 @@
   "name": "geardrop",
   "version": "1.0.0",
   "type": "module",
+  "dependencies": {
+    "firebase": "^10.8.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
-  },
-  "devDependencies": {
-    "vite": "^7.3.1"
   }
 }
