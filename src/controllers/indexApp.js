@@ -55,7 +55,8 @@ document.getElementById('tab-driver-signup')?.addEventListener('click', () => {
 // 2. SHOP AUTHENTICATION
 // ==========================================
 document.getElementById('btn-shop-email-reg')?.addEventListener('click', async (e) => {
-    const btn = e.target;
+    e.preventDefault();
+    const btn = e.currentTarget;
     btn.innerText = "Processing..."; // Visual feedback!
     
     const email = document.getElementById('shop-reg-email').value;
@@ -86,7 +87,8 @@ document.getElementById('btn-shop-email-reg')?.addEventListener('click', async (
 });
 
 document.getElementById('btn-shop-email-login')?.addEventListener('click', async (e) => {
-    const btn = e.target;
+    e.preventDefault();
+    const btn = e.currentTarget;
     btn.innerText = "Logging in...";
     const email = document.getElementById('shop-login-email').value;
     const password = document.getElementById('shop-login-password').value;
@@ -106,7 +108,8 @@ document.getElementById('btn-shop-email-login')?.addEventListener('click', async
 // 3. DRIVER AUTHENTICATION
 // ==========================================
 document.getElementById('btn-driver-email-reg')?.addEventListener('click', async (e) => {
-    const btn = e.target;
+    e.preventDefault();
+    const btn = e.currentTarget;
     btn.innerText = "Processing...";
     
     const email = document.getElementById('driver-reg-email').value;
@@ -141,7 +144,8 @@ document.getElementById('btn-driver-email-reg')?.addEventListener('click', async
 });
 
 document.getElementById('btn-driver-email-login')?.addEventListener('click', async (e) => {
-    const btn = e.target;
+    e.preventDefault();
+    const btn = e.currentTarget;
     btn.innerText = "Logging in...";
     const email = document.getElementById('driver-login-email').value;
     const password = document.getElementById('driver-login-password').value;
