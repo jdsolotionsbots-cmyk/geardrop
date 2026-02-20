@@ -1,6 +1,6 @@
-import { auth, db } from '../firebase.js';
+import { auth, db } from '../config/firebase.js';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 // ==========================================
 // 1. UI & MODAL LOGIC
@@ -73,7 +73,7 @@ document.getElementById('btn-shop-email-reg')?.addEventListener('click', async (
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await setDoc(doc(db, 'users', userCredential.user.uid), {
-            email: email, name: name, businessName: business, phone: phone, role: 'shop', status: 'active'
+            email: email, name: name, businessName: business, phone: phone, role: 'dealer', status: 'active'
         });
         btn.innerText = "Success! Redirecting...";
         btn.style.background = "#4CAF50"; // Turn Green
@@ -92,8 +92,10 @@ document.getElementById('btn-shop-email-login')?.addEventListener('click', async
     const password = document.getElementById('shop-login-password').value;
     
     try {
-        await signInWithEmailAndPassword(auth, email, password);
-        window.location.href = '/dealer.html';
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+        const role = userDoc.exists() ? userDoc.data().role : 'dealer';
+        window.location.href = role === 'driver' ? '/driver.html' : '/dealer.html';
     } catch (error) {
         btn.innerText = "Invalid Email or Password";
         btn.style.background = "#ff3333";
@@ -124,6 +126,10 @@ document.getElementById('btn-driver-email-reg')?.addEventListener('click', async
         await setDoc(doc(db, 'drivers', userCredential.user.uid), {
             email: email, name: name, vehicle: vehicle, phone: phone, role: 'driver', status: 'pending' 
         });
+        // Also save to 'users' collection so checkAuthState can find the role
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+            email: email, role: 'driver'
+        });
         btn.innerText = "Success! Redirecting...";
         btn.style.background = "#4CAF50";
         window.location.href = '/driver.html';
@@ -141,8 +147,10 @@ document.getElementById('btn-driver-email-login')?.addEventListener('click', asy
     const password = document.getElementById('driver-login-password').value;
     
     try {
-        await signInWithEmailAndPassword(auth, email, password);
-        window.location.href = '/driver.html';
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+        const role = userDoc.exists() ? userDoc.data().role : 'driver';
+        window.location.href = role === 'dealer' ? '/dealer.html' : '/driver.html';
     } catch (error) {
         btn.innerText = "Invalid Email or Password";
         btn.style.background = "#ff3333";
