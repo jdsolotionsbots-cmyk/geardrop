@@ -52,37 +52,42 @@ document.getElementById('tab-driver-signup')?.addEventListener('click', () => {
 });
 
 // ==========================================
-// 2. SHOP AUTHENTICATION (EMAIL/PASSWORD)
+// 2. SHOP AUTHENTICATION
 // ==========================================
-document.getElementById('btn-shop-email-reg')?.addEventListener('click', async () => {
+document.getElementById('btn-shop-email-reg')?.addEventListener('click', async (e) => {
+    const btn = e.target;
+    btn.innerText = "Processing..."; // Visual feedback!
+    
     const email = document.getElementById('shop-reg-email').value;
     const password = document.getElementById('shop-reg-password').value;
     const name = document.getElementById('shop-reg-name').value;
     const business = document.getElementById('shop-reg-business').value;
     const phone = document.getElementById('shop-reg-phone').value;
 
-    if(!email || !password || !name) return alert("Please fill out all fields!");
+    if(!email || !password || !name) {
+        btn.innerText = "Missing Fields!";
+        btn.style.background = "#ff3333";
+        return;
+    }
 
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        await setDoc(doc(db, 'users', user.uid), {
-            email: email,
-            name: name,
-            businessName: business,
-            phone: phone,
-            role: 'shop',
-            status: 'active'
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+            email: email, name: name, businessName: business, phone: phone, role: 'shop', status: 'active'
         });
-
+        btn.innerText = "Success! Redirecting...";
+        btn.style.background = "#4CAF50"; // Turn Green
         window.location.href = '/dealer.html';
     } catch (error) {
-        alert("Error creating account: " + error.message);
+        console.error("Shop Reg Error:", error);
+        btn.innerText = "Error: " + error.code; // Show exact error on button
+        btn.style.background = "#ff3333"; // Turn Red
     }
 });
 
-document.getElementById('btn-shop-email-login')?.addEventListener('click', async () => {
+document.getElementById('btn-shop-email-login')?.addEventListener('click', async (e) => {
+    const btn = e.target;
+    btn.innerText = "Logging in...";
     const email = document.getElementById('shop-login-email').value;
     const password = document.getElementById('shop-login-password').value;
     
@@ -90,42 +95,48 @@ document.getElementById('btn-shop-email-login')?.addEventListener('click', async
         await signInWithEmailAndPassword(auth, email, password);
         window.location.href = '/dealer.html';
     } catch (error) {
-        alert("Login failed: " + error.message);
+        btn.innerText = "Invalid Email or Password";
+        btn.style.background = "#ff3333";
     }
 });
 
 // ==========================================
-// 3. DRIVER AUTHENTICATION (EMAIL/PASSWORD)
+// 3. DRIVER AUTHENTICATION
 // ==========================================
-document.getElementById('btn-driver-email-reg')?.addEventListener('click', async () => {
+document.getElementById('btn-driver-email-reg')?.addEventListener('click', async (e) => {
+    const btn = e.target;
+    btn.innerText = "Processing...";
+    
     const email = document.getElementById('driver-reg-email').value;
     const password = document.getElementById('driver-reg-password').value;
     const name = document.getElementById('driver-reg-name').value;
     const vehicle = document.getElementById('driver-reg-vehicle').value;
     const phone = document.getElementById('driver-reg-phone').value;
 
-    if(!email || !password || !name) return alert("Please fill out all fields!");
+    if(!email || !password || !name) {
+        btn.innerText = "Missing Fields!";
+        btn.style.background = "#ff3333";
+        return;
+    }
 
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        await setDoc(doc(db, 'drivers', user.uid), {
-            email: email,
-            name: name,
-            vehicle: vehicle,
-            phone: phone,
-            role: 'driver',
-            status: 'pending' 
+        await setDoc(doc(db, 'drivers', userCredential.user.uid), {
+            email: email, name: name, vehicle: vehicle, phone: phone, role: 'driver', status: 'pending' 
         });
-
+        btn.innerText = "Success! Redirecting...";
+        btn.style.background = "#4CAF50";
         window.location.href = '/driver.html';
     } catch (error) {
-        alert("Error submitting application: " + error.message);
+        console.error("Driver Reg Error:", error);
+        btn.innerText = "Error: " + error.code;
+        btn.style.background = "#ff3333";
     }
 });
 
-document.getElementById('btn-driver-email-login')?.addEventListener('click', async () => {
+document.getElementById('btn-driver-email-login')?.addEventListener('click', async (e) => {
+    const btn = e.target;
+    btn.innerText = "Logging in...";
     const email = document.getElementById('driver-login-email').value;
     const password = document.getElementById('driver-login-password').value;
     
@@ -133,6 +144,7 @@ document.getElementById('btn-driver-email-login')?.addEventListener('click', asy
         await signInWithEmailAndPassword(auth, email, password);
         window.location.href = '/driver.html';
     } catch (error) {
-        alert("Login failed: " + error.message);
+        btn.innerText = "Invalid Email or Password";
+        btn.style.background = "#ff3333";
     }
 });
