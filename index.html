@@ -7,16 +7,32 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/public/style.css">
     <style>
-        /* Extra styles to make the homepage look like a premium startup */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         .hero { text-align: center; padding: 120px 20px 80px; max-width: 1000px; margin: 0 auto; }
         .hero-title { font-size: 4.5rem; margin-bottom: 20px; font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; }
         .hero-subtitle { color: var(--text-muted); font-size: 1.3rem; margin-bottom: 50px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
         .action-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px; }
-        .card { background: var(--bg-card); padding: 40px; border-radius: 20px; border: 1px solid var(--border); transition: transform 0.3s ease; }
+        .card { background: var(--bg-card); padding: 40px; border-radius: 20px; border: 1px solid var(--border); transition: transform 0.3s ease; cursor: pointer; }
         .card:hover { transform: translateY(-5px); border-color: var(--primary); }
         .features { padding: 80px 20px; background: #0a0a0a; text-align: center; }
         .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; max-width: 1000px; margin: 50px auto 0; }
+        
+        /* Modal Styles */
+        .auth-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 3000; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+        .auth-box { background: var(--bg-card); width: 90%; max-width: 450px; border-radius: 20px; border: 1px solid var(--border); padding: 30px; position: relative; max-height: 90vh; overflow-y: auto; }
+        .auth-close { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+        .auth-close:hover { color: #fff; }
+        .auth-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 25px; }
+        .auth-tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: bold; color: var(--text-muted); border-bottom: 2px solid transparent; }
+        .auth-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+        .auth-input { width: 100%; padding: 15px; background: var(--bg-dark); border: 1px solid var(--border); color: #fff; border-radius: 8px; margin-bottom: 15px; outline: none; box-sizing: border-box; }
+        .auth-input:focus { border-color: var(--primary); }
+        .auth-divider { display: flex; align-items: center; text-align: center; margin: 20px 0; color: var(--text-muted); font-size: 0.9rem; }
+        .auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
+        .auth-divider::before { margin-right: .5em; }
+        .auth-divider::after { margin-left: .5em; }
+        .hidden { display: none !important; }
+
         @media (max-width: 768px) { .feature-grid { grid-template-columns: 1fr; } .hero-title { font-size: 3rem; } }
     </style>
 </head>
@@ -27,31 +43,89 @@
     </nav>
 
     <header class="hero">
-        <h1 class="hero-title">
-            Parts. Delivered. <span style="color: var(--primary);">Instantly.</span>
-        </h1>
+        <h1 class="hero-title">Parts. Delivered. <span style="color: var(--primary);">Instantly.</span></h1>
         <p class="hero-subtitle">The first on-demand logistics network built specifically for the modern automotive industry. Connect with local drivers to move parts faster.</p>
         
         <div class="action-cards">
-            <div class="card">
+            <div class="card" onclick="openModal('shop-modal')">
                 <i class="fas fa-wrench" style="font-size: 3rem; color: #fff; margin-bottom: 20px;"></i>
                 <h2 style="margin-bottom: 10px;">I'm a Shop</h2>
                 <p style="color: var(--text-muted); margin-bottom: 30px;">Request instant deliveries from local dealers directly to your bay.</p>
-                <button id="btn-login-dealer" class="btn full-width" style="background: #fff; color: #000; font-weight: bold; font-size: 1.1rem; padding: 15px;">
-                    <i class="fab fa-google" style="color: #DB4437; margin-right: 10px;"></i> Login as Shop
-                </button>
+                <button class="btn full-width" style="background: #fff; color: #000; font-weight: bold; font-size: 1.1rem; padding: 15px;">Login or Sign Up</button>
             </div>
             
-            <div class="card" style="border-color: var(--primary);">
+            <div class="card" style="border-color: var(--primary);" onclick="openModal('driver-modal')">
                 <i class="fas fa-car-side" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px;"></i>
                 <h2 style="margin-bottom: 10px;">I'm a Driver</h2>
                 <p style="color: var(--text-muted); margin-bottom: 30px;">Earn money delivering car parts in your city. Work on your own schedule.</p>
-                <button id="btn-login-driver" class="btn btn-primary full-width" style="font-weight: bold; font-size: 1.1rem; padding: 15px;">
-                    <i class="fab fa-google" style="margin-right: 10px;"></i> Sign Up to Drive
-                </button>
+                <button class="btn btn-primary full-width" style="font-weight: bold; font-size: 1.1rem; padding: 15px;">Login or Sign Up</button>
             </div>
         </div>
     </header>
+
+    <div id="shop-modal" class="auth-modal">
+        <div class="auth-box">
+            <button class="auth-close" onclick="closeModal('shop-modal')">&times;</button>
+            <h2 style="margin-top: 0; margin-bottom: 20px;"><i class="fas fa-wrench" style="color: var(--primary);"></i> Shop Portal</h2>
+            
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tab-shop-login" onclick="switchTab('shop', 'login')">Login</div>
+                <div class="auth-tab" id="tab-shop-signup" onclick="switchTab('shop', 'signup')">Create Account</div>
+            </div>
+
+            <div id="form-shop-login">
+                <input type="email" id="shop-login-email" class="auth-input" placeholder="Email Address">
+                <input type="password" id="shop-login-password" class="auth-input" placeholder="Password">
+                <button id="btn-shop-email-login" class="btn btn-primary full-width" style="padding: 15px; font-size: 1.1rem;">Login</button>
+            </div>
+
+            <div id="form-shop-signup" class="hidden">
+                <input type="text" id="shop-reg-name" class="auth-input" placeholder="Your Full Name">
+                <input type="text" id="shop-reg-business" class="auth-input" placeholder="Business / Shop Name">
+                <input type="tel" id="shop-reg-phone" class="auth-input" placeholder="Phone Number">
+                <input type="email" id="shop-reg-email" class="auth-input" placeholder="Email Address">
+                <input type="password" id="shop-reg-password" class="auth-input" placeholder="Create Password">
+                <button id="btn-shop-email-reg" class="btn btn-primary full-width" style="padding: 15px; font-size: 1.1rem;">Create Shop Account</button>
+            </div>
+
+            <div class="auth-divider">OR</div>
+            <button id="btn-login-dealer" class="btn full-width" style="background: #fff; color: #000; font-weight: bold;">
+                <i class="fab fa-google" style="color: #DB4437; margin-right: 10px;"></i> Continue with Google
+            </button>
+        </div>
+    </div>
+
+    <div id="driver-modal" class="auth-modal">
+        <div class="auth-box">
+            <button class="auth-close" onclick="closeModal('driver-modal')">&times;</button>
+            <h2 style="margin-top: 0; margin-bottom: 20px;"><i class="fas fa-car-side" style="color: var(--primary);"></i> Driver Portal</h2>
+            
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tab-driver-login" onclick="switchTab('driver', 'login')">Login</div>
+                <div class="auth-tab" id="tab-driver-signup" onclick="switchTab('driver', 'signup')">Apply to Drive</div>
+            </div>
+
+            <div id="form-driver-login">
+                <input type="email" id="driver-login-email" class="auth-input" placeholder="Email Address">
+                <input type="password" id="driver-login-password" class="auth-input" placeholder="Password">
+                <button id="btn-driver-email-login" class="btn btn-primary full-width" style="padding: 15px; font-size: 1.1rem;">Login</button>
+            </div>
+
+            <div id="form-driver-signup" class="hidden">
+                <input type="text" id="driver-reg-name" class="auth-input" placeholder="Full Legal Name">
+                <input type="text" id="driver-reg-vehicle" class="auth-input" placeholder="Vehicle Make & Model (e.g. Honda Civic)">
+                <input type="tel" id="driver-reg-phone" class="auth-input" placeholder="Phone Number">
+                <input type="email" id="driver-reg-email" class="auth-input" placeholder="Email Address">
+                <input type="password" id="driver-reg-password" class="auth-input" placeholder="Create Password">
+                <button id="btn-driver-email-reg" class="btn btn-primary full-width" style="padding: 15px; font-size: 1.1rem;">Submit Application</button>
+            </div>
+
+            <div class="auth-divider">OR</div>
+            <button id="btn-login-driver" class="btn full-width" style="background: #fff; color: #000; font-weight: bold;">
+                <i class="fab fa-google" style="color: #DB4437; margin-right: 10px;"></i> Continue with Google
+            </button>
+        </div>
+    </div>
 
     <section class="features">
         <h2>Why GearDrop?</h2>
@@ -59,21 +133,29 @@
             <div>
                 <i class="fas fa-bolt" style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;"></i>
                 <h3>Lightning Fast</h3>
-                <p style="color: var(--text-muted);">No more waiting for the parts truck. Get your parts in minutes, not hours.</p>
-            </div>
-            <div>
-                <i class="fas fa-map-marker-alt" style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;"></i>
-                <h3>Live Tracking</h3>
-                <p style="color: var(--text-muted);">Watch your driver on the map in real-time so your mechanic is always ready.</p>
+                <p style="color: var(--text-muted);">No more waiting for the parts truck. Get your parts in minutes.</p>
             </div>
             <div>
                 <i class="fas fa-shield-alt" style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;"></i>
                 <h3>Verified Drivers</h3>
-                <p style="color: var(--text-muted);">Every driver is manually vetted and approved by our admin team for secure transit.</p>
+                <p style="color: var(--text-muted);">Every driver is manually vetted for secure transit.</p>
             </div>
         </div>
     </section>
 
+    <script>
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function switchTab(portal, action) {
+            document.getElementById(`tab-${portal}-login`).classList.remove('active');
+            document.getElementById(`tab-${portal}-signup`).classList.remove('active');
+            document.getElementById(`form-${portal}-login`).classList.add('hidden');
+            document.getElementById(`form-${portal}-signup`).classList.add('hidden');
+            
+            document.getElementById(`tab-${portal}-${action}`).classList.add('active');
+            document.getElementById(`form-${portal}-${action}`).classList.remove('hidden');
+        }
+    </script>
     <script type="module" src="/src/controllers/indexApp.js"></script>
 </body>
 </html>
