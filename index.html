@@ -7,58 +7,101 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/public/style.css">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        .hero { text-align: center; padding: 120px 20px 80px; max-width: 1000px; margin: 0 auto; }
-        .hero-title { font-size: 4.5rem; margin-bottom: 20px; font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; }
-        .hero-subtitle { color: var(--text-muted); font-size: 1.3rem; margin-bottom: 50px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
-        .action-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px; }
-        .card { background: var(--bg-card); padding: 40px; border-radius: 20px; border: 1px solid var(--border); transition: transform 0.3s ease; cursor: pointer; }
-        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        .features { padding: 80px 20px; background: #0a0a0a; text-align: center; }
-        .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; max-width: 1000px; margin: 50px auto 0; }
+        /* Premium Startup UI Overrides */
+        :root {
+            --primary-glow: rgba(255, 102, 0, 0.15);
+            --card-bg: rgba(20, 20, 20, 0.6);
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #050505;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
         
-        /* Modal Styles */
-        .auth-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 3000; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
-        .auth-box { background: var(--bg-card); width: 90%; max-width: 450px; border-radius: 20px; border: 1px solid var(--border); padding: 30px; position: relative; max-height: 90vh; overflow-y: auto; }
-        .auth-close { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
-        .auth-close:hover { color: #fff; }
-        .auth-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 25px; }
-        .auth-tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: bold; color: var(--text-muted); border-bottom: 2px solid transparent; }
-        .auth-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
-        .auth-input { width: 100%; padding: 15px; background: var(--bg-dark); border: 1px solid var(--border); color: #fff; border-radius: 8px; margin-bottom: 15px; outline: none; box-sizing: border-box; }
-        .auth-input:focus { border-color: var(--primary); }
-        .auth-divider { display: flex; align-items: center; text-align: center; margin: 20px 0; color: var(--text-muted); font-size: 0.9rem; }
-        .auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
-        .auth-divider::before { margin-right: .5em; }
-        .auth-divider::after { margin-left: .5em; }
-        .hidden { display: none !important; }
+        /* Subtle glowing background effect */
+        .ambient-glow {
+            position: absolute;
+            top: -20%; left: 50%; transform: translateX(-50%);
+            width: 80vw; height: 60vh;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 60%);
+            z-index: -1; pointer-events: none;
+        }
 
-        @media (max-width: 768px) { .feature-grid { grid-template-columns: 1fr; } .hero-title { font-size: 3rem; } }
+        .top-nav { padding: 25px 40px; display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        
+        .hero { text-align: center; padding: 100px 20px 80px; max-width: 1000px; margin: 0 auto; position: relative; }
+        .hero-title { font-size: 5rem; margin-bottom: 20px; font-weight: 900; letter-spacing: -2px; line-height: 1.05; }
+        
+        /* Gradient Text */
+        .text-gradient {
+            background: linear-gradient(135deg, #FF6600 0%, #FF9900 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+        .hero-subtitle { color: #888; font-size: 1.25rem; margin-bottom: 60px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+        
+        .action-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-top: 40px; }
+        
+        /* Glassmorphism Cards */
+        .card { 
+            background: var(--card-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            padding: 50px 40px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); 
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; text-align: left;
+        }
+        .card:hover { transform: translateY(-8px); border-color: rgba(255, 102, 0, 0.5); box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 40px var(--primary-glow); }
+        .card-icon-wrap { width: 60px; height: 60px; border-radius: 16px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; margin-bottom: 25px; }
+        
+        /* Modals */
+        .auth-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 3000; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
+        .auth-box { background: #0f0f0f; width: 90%; max-width: 420px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); padding: 40px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .auth-close { position: absolute; top: 20px; right: 25px; background: none; border: none; color: #666; font-size: 1.8rem; cursor: pointer; transition: color 0.2s; }
+        .auth-close:hover { color: #fff; }
+        
+        .auth-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 30px; }
+        .auth-tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: 600; color: #666; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .auth-tab.active { color: #FF6600; border-bottom: 2px solid #FF6600; }
+        
+        /* Premium Inputs */
+        .auth-input { width: 100%; padding: 16px 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 12px; margin-bottom: 15px; outline: none; box-sizing: border-box; font-size: 1rem; transition: all 0.2s; }
+        .auth-input:focus { border-color: #FF6600; background: rgba(255,255,255,0.05); box-shadow: 0 0 0 4px rgba(255,102,0,0.1); }
+        
+        .btn-premium { background: #fff; color: #000; border: none; font-weight: 700; font-size: 1.1rem; padding: 16px; border-radius: 12px; cursor: pointer; transition: transform 0.2s, background 0.2s; width: 100%; }
+        .btn-premium:hover { background: #f0f0f0; transform: scale(0.98); }
+        .btn-premium.brand { background: #FF6600; color: #fff; }
+        .btn-premium.brand:hover { background: #e65c00; }
+        
+        .hidden { display: none !important; }
+        @media (max-width: 768px) { .hero-title { font-size: 3.5rem; } .card { padding: 30px 20px; } }
     </style>
 </head>
-<body style="background: var(--bg-dark); color: #fff;">
+<body>
 
-    <nav class="top-nav" style="padding: 20px 40px; border-bottom: 1px solid var(--border);">
-        <img src="/public/logo.png" alt="GearDrop" style="height: 40px;">
+    <div class="ambient-glow"></div>
+
+    <nav class="top-nav">
+        <img src="/public/logo.png" alt="GearDrop" style="height: 35px;">
     </nav>
 
     <header class="hero">
-        <h1 class="hero-title">Parts. Delivered. <span style="color: var(--primary);">Instantly.</span></h1>
-        <p class="hero-subtitle">The first on-demand logistics network built specifically for the modern automotive industry. Connect with local drivers to move parts faster.</p>
+        <h1 class="hero-title">Parts. Delivered. <br><span class="text-gradient">Instantly.</span></h1>
+        <p class="hero-subtitle">The modern logistics network built exclusively for the automotive industry. Request parts or drive on your own schedule.</p>
         
         <div class="action-cards">
             <div class="card" id="card-open-shop">
-                <i class="fas fa-wrench" style="font-size: 3rem; color: #fff; margin-bottom: 20px;"></i>
-                <h2 style="margin-bottom: 10px;">I'm a Shop</h2>
-                <p style="color: var(--text-muted); margin-bottom: 30px;">Request instant deliveries from local dealers directly to your bay.</p>
-                <button type="button" class="btn full-width" style="background: #fff; color: #000; font-weight: bold; font-size: 1.1rem; padding: 15px;">Login or Sign Up</button>
+                <div class="card-icon-wrap"><i class="fas fa-wrench" style="font-size: 1.8rem; color: #fff;"></i></div>
+                <h2 style="margin-top: 0; margin-bottom: 10px; font-size: 1.8rem;">I'm a Shop</h2>
+                <p style="color: #888; margin-bottom: 30px; line-height: 1.5;">Request instant deliveries from local dealers directly to your service bay.</p>
+                <button type="button" class="btn-premium">Login or Sign Up &rarr;</button>
             </div>
             
-            <div class="card" id="card-open-driver" style="border-color: var(--primary);">
-                <i class="fas fa-car-side" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px;"></i>
-                <h2 style="margin-bottom: 10px;">I'm a Driver</h2>
-                <p style="color: var(--text-muted); margin-bottom: 30px;">Earn money delivering car parts in your city. Work on your own schedule.</p>
-                <button type="button" class="btn btn-primary full-width" style="font-weight: bold; font-size: 1.1rem; padding: 15px;">Login or Sign Up</button>
+            <div class="card" id="card-open-driver" style="border-color: rgba(255,102,0,0.3);">
+                <div class="card-icon-wrap" style="background: rgba(255,102,0,0.1);"><i class="fas fa-car-side" style="font-size: 1.8rem; color: #FF6600;"></i></div>
+                <h2 style="margin-top: 0; margin-bottom: 10px; font-size: 1.8rem;">I'm a Driver</h2>
+                <p style="color: #888; margin-bottom: 30px; line-height: 1.5;">Earn money delivering car parts in your city. Drive and work on your own schedule.</p>
+                <button type="button" class="btn-premium brand">Login or Sign Up &rarr;</button>
             </div>
         </div>
     </header>
@@ -66,7 +109,10 @@
     <div id="shop-modal" class="auth-modal">
         <div class="auth-box">
             <button type="button" class="auth-close" id="close-shop-modal">&times;</button>
-            <h2 style="margin-top: 0; margin-bottom: 20px;"><i class="fas fa-wrench" style="color: var(--primary);"></i> Shop Portal</h2>
+            <div style="display: flex; align-items: center; margin-bottom: 25px;">
+                <div class="card-icon-wrap" style="width: 45px; height: 45px; margin-bottom: 0; margin-right: 15px;"><i class="fas fa-wrench" style="color: #fff;"></i></div>
+                <h2 style="margin: 0; font-size: 1.5rem;">Shop Portal</h2>
+            </div>
             
             <div class="auth-tabs">
                 <div class="auth-tab active" id="tab-shop-login">Login</div>
@@ -76,7 +122,7 @@
             <div id="form-shop-login">
                 <input type="email" id="shop-login-email" class="auth-input" placeholder="Email Address">
                 <input type="password" id="shop-login-password" class="auth-input" placeholder="Password">
-                <button type="button" id="btn-shop-email-login" class="btn btn-primary full-width" style="padding: 15px; font-size: 1.1rem;">Login</button>
+                <button type="button" id="btn-shop-email-login" class="btn-premium brand" style="margin-top: 10px;">Login securely</button>
             </div>
 
             <div id="form-shop-signup" class="hidden">
@@ -85,20 +131,18 @@
                 <input type="tel" id="shop-reg-phone" class="auth-input" placeholder="Phone Number">
                 <input type="email" id="shop-reg-email" class="auth-input" placeholder="Email Address">
                 <input type="password" id="shop-reg-password" class="auth-input" placeholder="Create Password">
-                <button type="button" id="btn-shop-email-reg" class="btn btn-primary full-width" style="padding: 15px; font-size: 1.1rem;">Create Shop Account</button>
+                <button type="button" id="btn-shop-email-reg" class="btn-premium" style="margin-top: 10px;">Create Shop Account</button>
             </div>
-
-            <div class="auth-divider">OR</div>
-            <button type="button" id="btn-login-dealer" class="btn full-width" style="background: #fff; color: #000; font-weight: bold;">
-                <i class="fab fa-google" style="color: #DB4437; margin-right: 10px;"></i> Continue with Google
-            </button>
         </div>
     </div>
 
     <div id="driver-modal" class="auth-modal">
         <div class="auth-box">
             <button type="button" class="auth-close" id="close-driver-modal">&times;</button>
-            <h2 style="margin-top: 0; margin-bottom: 20px;"><i class="fas fa-car-side" style="color: var(--primary);"></i> Driver Portal</h2>
+            <div style="display: flex; align-items: center; margin-bottom: 25px;">
+                <div class="card-icon-wrap" style="width: 45px; height: 45px; margin-bottom: 0; margin-right: 15px; background: rgba(255,102,0,0.1);"><i class="fas fa-car-side" style="color: #FF6600;"></i></div>
+                <h2 style="margin: 0; font-size: 1.5rem;">Driver Portal</h2>
+            </div>
             
             <div class="auth-tabs">
                 <div class="auth-tab active" id="tab-driver-login">Login</div>
@@ -108,7 +152,7 @@
             <div id="form-driver-login">
                 <input type="email" id="driver-login-email" class="auth-input" placeholder="Email Address">
                 <input type="password" id="driver-login-password" class="auth-input" placeholder="Password">
-                <button type="button" id="btn-driver-email-login" class="btn btn-primary full-width" style="padding: 15px; font-size: 1.1rem;">Login</button>
+                <button type="button" id="btn-driver-email-login" class="btn-premium brand" style="margin-top: 10px;">Login securely</button>
             </div>
 
             <div id="form-driver-signup" class="hidden">
@@ -117,33 +161,11 @@
                 <input type="tel" id="driver-reg-phone" class="auth-input" placeholder="Phone Number">
                 <input type="email" id="driver-reg-email" class="auth-input" placeholder="Email Address">
                 <input type="password" id="driver-reg-password" class="auth-input" placeholder="Create Password">
-                <button type="button" id="btn-driver-email-reg" class="btn btn-primary full-width" style="padding: 15px; font-size: 1.1rem;">Submit Application</button>
+                <button type="button" id="btn-driver-email-reg" class="btn-premium brand" style="margin-top: 10px;">Submit Application</button>
             </div>
-
-            <div class="auth-divider">OR</div>
-            <button type="button" id="btn-login-driver" class="btn full-width" style="background: #fff; color: #000; font-weight: bold;">
-                <i class="fab fa-google" style="color: #DB4437; margin-right: 10px;"></i> Continue with Google
-            </button>
         </div>
     </div>
 
-    <section class="features">
-        <h2>Why GearDrop?</h2>
-        <div class="feature-grid">
-            <div>
-                <i class="fas fa-bolt" style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;"></i>
-                <h3>Lightning Fast</h3>
-                <p style="color: var(--text-muted);">No more waiting for the parts truck. Get your parts in minutes.</p>
-            </div>
-            <div>
-                <i class="fas fa-shield-alt" style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;"></i>
-                <h3>Verified Drivers</h3>
-                <p style="color: var(--text-muted);">Every driver is manually vetted for secure transit.</p>
-            </div>
-        </div>
-    </section>
-
-    <script type="module" src="/src/controllers/indexApp.js"></script>
     <script type="module" src="/src/controllers/ui.js"></script>
     <script type="module" src="/src/controllers/indexApp.js"></script>
 </body>
