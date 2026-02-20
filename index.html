@@ -6,36 +6,73 @@
     <title>GearDrop | Logistics</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/public/style.css">
+    <style>
+        /* Extra styles to make the homepage look like a premium startup */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .hero { text-align: center; padding: 120px 20px 80px; max-width: 1000px; margin: 0 auto; }
+        .hero-title { font-size: 4.5rem; margin-bottom: 20px; font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; }
+        .hero-subtitle { color: var(--text-muted); font-size: 1.3rem; margin-bottom: 50px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+        .action-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px; }
+        .card { background: var(--bg-card); padding: 40px; border-radius: 20px; border: 1px solid var(--border); transition: transform 0.3s ease; }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .features { padding: 80px 20px; background: #0a0a0a; text-align: center; }
+        .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; max-width: 1000px; margin: 50px auto 0; }
+        @media (max-width: 768px) { .feature-grid { grid-template-columns: 1fr; } .hero-title { font-size: 3rem; } }
+    </style>
 </head>
-<body>
-    <nav class="top-nav">
-        <img src="/public/logo.png" alt="GearDrop" style="height: 35px;">
+<body style="background: var(--bg-dark); color: #fff;">
+
+    <nav class="top-nav" style="padding: 20px 40px; border-bottom: 1px solid var(--border);">
+        <img src="/public/logo.png" alt="GearDrop" style="height: 40px;">
     </nav>
 
-    <header style="text-align: center; padding: 100px 20px; max-width: 900px; margin: 0 auto;">
-        <h1 style="font-size: 4rem; margin-bottom: 10px; font-weight: 800; letter-spacing: -1px;">
-            Parts. Delivered. <span style="color: var(--primary);">Fast.</span>
+    <header class="hero">
+        <h1 class="hero-title">
+            Parts. Delivered. <span style="color: var(--primary);">Instantly.</span>
         </h1>
-        <p style="color: var(--text-muted); font-size: 1.2rem; margin-bottom: 60px;">The logistics backbone for the modern mechanic.</p>
+        <p class="hero-subtitle">The first on-demand logistics network built specifically for the modern automotive industry. Connect with local drivers to move parts faster.</p>
         
-        <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
-            <div style="background: var(--bg-card); padding: 40px; border-radius: 16px; flex: 1; min-width: 280px; border: 1px solid var(--border);">
-                <i class="fas fa-wrench" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 20px;"></i>
-                <h3 style="margin-bottom: 20px;">I Need Parts</h3>
-                <button id="btn-login-dealer" class="btn full-width">
-                    <i class="fab fa-google" style="color: #DB4437;"></i> Login as Shop
+        <div class="action-cards">
+            <div class="card">
+                <i class="fas fa-wrench" style="font-size: 3rem; color: #fff; margin-bottom: 20px;"></i>
+                <h2 style="margin-bottom: 10px;">I'm a Shop</h2>
+                <p style="color: var(--text-muted); margin-bottom: 30px;">Request instant deliveries from local dealers directly to your bay.</p>
+                <button id="btn-login-dealer" class="btn full-width" style="background: #fff; color: #000; font-weight: bold; font-size: 1.1rem; padding: 15px;">
+                    <i class="fab fa-google" style="color: #DB4437; margin-right: 10px;"></i> Login as Shop
                 </button>
             </div>
             
-            <div style="background: var(--bg-card); padding: 40px; border-radius: 16px; flex: 1; min-width: 280px; border: 1px solid var(--primary);">
-                <i class="fas fa-car-side" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 20px;"></i>
-                <h3 style="margin-bottom: 20px;">I'm a Driver</h3>
-                <button id="btn-login-driver" class="btn full-width">
-                    <i class="fab fa-google" style="color: #DB4437;"></i> Sign Up to Drive
+            <div class="card" style="border-color: var(--primary);">
+                <i class="fas fa-car-side" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px;"></i>
+                <h2 style="margin-bottom: 10px;">I'm a Driver</h2>
+                <p style="color: var(--text-muted); margin-bottom: 30px;">Earn money delivering car parts in your city. Work on your own schedule.</p>
+                <button id="btn-login-driver" class="btn btn-primary full-width" style="font-weight: bold; font-size: 1.1rem; padding: 15px;">
+                    <i class="fab fa-google" style="margin-right: 10px;"></i> Sign Up to Drive
                 </button>
             </div>
         </div>
     </header>
+
+    <section class="features">
+        <h2>Why GearDrop?</h2>
+        <div class="feature-grid">
+            <div>
+                <i class="fas fa-bolt" style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;"></i>
+                <h3>Lightning Fast</h3>
+                <p style="color: var(--text-muted);">No more waiting for the parts truck. Get your parts in minutes, not hours.</p>
+            </div>
+            <div>
+                <i class="fas fa-map-marker-alt" style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;"></i>
+                <h3>Live Tracking</h3>
+                <p style="color: var(--text-muted);">Watch your driver on the map in real-time so your mechanic is always ready.</p>
+            </div>
+            <div>
+                <i class="fas fa-shield-alt" style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;"></i>
+                <h3>Verified Drivers</h3>
+                <p style="color: var(--text-muted);">Every driver is manually vetted and approved by our admin team for secure transit.</p>
+            </div>
+        </div>
+    </section>
 
     <script type="module" src="/src/controllers/indexApp.js"></script>
 </body>

@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GearDrop | Driver</title>
+    <title>GearDrop | Shop</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="/public/style.css">
 </head>
 <body>
@@ -16,27 +17,71 @@
         </div>
     </nav>
 
-    <div id="driver-pending-view" style="display: none; text-align: center; padding: 100px 20px;">
-        <i class="fas fa-shield-alt" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
-        <h2>Account Pending</h2>
-        <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto 30px auto;">Your profile is currently under review by the Admin. Please upload your license if you haven't already.</p>
-        <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 30px; border-radius: 12px; max-width: 400px; margin: 0 auto;">
-            <input type="file" id="license-upload" accept="image/*" style="display:none;">
-            <button id="btn-upload-license" class="btn btn-primary full-width"><i class="fas fa-camera"></i> Upload License Photo</button>
-            <p id="upload-status" style="margin-top: 15px; font-size: 0.9rem; color: #4CAF50;"></p>
+    <div class="split-layout">
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+
+        <div class="side-panel">
+            <h2 style="margin-top:0;">Request Route</h2>
+            <h1 id="live-price" style="color: var(--primary); font-size: 2.5rem; margin: 10px 0;">$0.00</h1>
+            
+            <select id="schedule-time" class="input-dark">
+                <option value="now">Deliver ASAP (Now)</option>
+                <option value="08:00">Tomorrow Morning (8:00 AM)</option>
+            </select>
+
+            <div id="stops-container">
+                <div class="stop-entry" style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid var(--primary);">
+                    <small style="color:var(--primary); font-weight:bold;">STOP 1 (PICKUP)</small>
+                    <input type="text" placeholder="Address..." class="input-dark stop-address" style="margin-top:10px;">
+                    <input type="text" placeholder="Part Details / PO#" class="input-dark stop-details" style="margin-bottom:0;">
+                </div>
+            </div>
+
+            <button id="btn-add-stop" class="btn-text full-width" style="margin-bottom: 20px; text-align: left; color: var(--primary);">
+                <i class="fas fa-plus"></i> Add Another Stop
+            </button>
+            
+            <button id="btn-confirm-route" class="btn btn-primary full-width">Confirm Route</button>
+            <div id="order-status-banner" style="margin-top: 20px;"></div>
         </div>
     </div>
 
-    <div id="driver-active-view" style="display: none; padding: 30px; max-width: 800px; margin: 0 auto;">
-        <h2>Available Routes</h2>
-        <div id="driver-live-list"></div>
+    <button id="chat-fab" class="btn btn-primary" style="position: fixed; bottom: 30px; right: 30px; border-radius: 50%; width: 60px; height: 60px; font-size: 1.5rem; box-shadow: 0 4px 15px rgba(255,102,0,0.4); z-index: 1000;">
+        <i class="fas fa-comment-dots"></i>
+    </button>
+
+    <div id="profile-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
+        <div style="background: var(--bg-card); padding: 40px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--border); position: relative;">
+            <button id="close-profile" style="position: absolute; top: 15px; right: 20px; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            <i class="fas fa-user-circle" style="font-size: 5rem; color: var(--primary); margin-bottom: 15px;"></i>
+            <h2 id="profile-name" style="margin-bottom: 5px;">User Name</h2>
+            <p id="profile-email" style="color: var(--text-muted); margin-bottom: 20px;">email@example.com</p>
+            <span id="profile-role" style="background: var(--primary); color: #fff; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">Verified Shop</span>
+        </div>
     </div>
 
-    <button id="chat-fab" class="chat-fab" style="display:none;"><i class="fas fa-comment-dots"></i></button>
+    <div id="chat-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
+        <div style="background: var(--bg-card); border-radius: 20px; width: 90%; max-width: 450px; height: 600px; max-height: 90vh; border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden;">
+            <div style="background: var(--bg-dark); padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);">
+                <h3 style="margin: 0;"><i class="fas fa-headset" style="color: var(--primary); margin-right: 10px;"></i> Dispatch Chat</h3>
+                <button id="close-chat" style="background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div id="chat-messages" style="flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: #0a0a0a;">
+                <div style="align-self: flex-start; background: var(--bg-card); padding: 12px 18px; border-radius: 20px 20px 20px 0; max-width: 80%;">
+                    <small style="color: var(--primary); display: block; margin-bottom: 5px; font-weight: bold;">System</small>
+                    Welcome to GearDrop! You can message drivers here.
+                </div>
+            </div>
+            <div style="padding: 20px; background: var(--bg-dark); border-top: 1px solid var(--border); display: flex; gap: 10px;">
+                <input type="text" id="chat-input" placeholder="Type a message..." style="flex: 1; padding: 15px; border-radius: 30px; border: 1px solid var(--border); background: #0a0a0a; color: #fff; outline: none;">
+                <button id="btn-send-chat" class="btn btn-primary" style="border-radius: 50%; width: 50px; height: 50px; padding: 0;"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
 
-    <div id="profile-modal" class="modal-overlay"></div>
-    <div id="chat-modal" class="modal-overlay"></div>
-
-    <script type="module" src="/src/controllers/driverApp.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="/src/controllers/dealerApp.js"></script>
 </body>
 </html>

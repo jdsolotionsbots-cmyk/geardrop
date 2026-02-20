@@ -48,6 +48,39 @@
         </div>
     </div>
 
+    <button id="chat-fab" class="btn btn-primary" style="position: fixed; bottom: 30px; right: 30px; border-radius: 50%; width: 60px; height: 60px; font-size: 1.5rem; box-shadow: 0 4px 15px rgba(255,102,0,0.4); z-index: 1000;">
+        <i class="fas fa-comment-dots"></i>
+    </button>
+
+    <div id="profile-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
+        <div style="background: var(--bg-card); padding: 40px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--border); position: relative;">
+            <button id="close-profile" style="position: absolute; top: 15px; right: 20px; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            <i class="fas fa-user-circle" style="font-size: 5rem; color: var(--primary); margin-bottom: 15px;"></i>
+            <h2 id="profile-name" style="margin-bottom: 5px;">User Name</h2>
+            <p id="profile-email" style="color: var(--text-muted); margin-bottom: 20px;">email@example.com</p>
+            <span id="profile-role" style="background: var(--primary); color: #fff; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">Verified Shop</span>
+        </div>
+    </div>
+
+    <div id="chat-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
+        <div style="background: var(--bg-card); border-radius: 20px; width: 90%; max-width: 450px; height: 600px; max-height: 90vh; border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden;">
+            <div style="background: var(--bg-dark); padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);">
+                <h3 style="margin: 0;"><i class="fas fa-headset" style="color: var(--primary); margin-right: 10px;"></i> Dispatch Chat</h3>
+                <button id="close-chat" style="background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div id="chat-messages" style="flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: #0a0a0a;">
+                <div style="align-self: flex-start; background: var(--bg-card); padding: 12px 18px; border-radius: 20px 20px 20px 0; max-width: 80%;">
+                    <small style="color: var(--primary); display: block; margin-bottom: 5px; font-weight: bold;">System</small>
+                    Welcome to GearDrop! You can message drivers here.
+                </div>
+            </div>
+            <div style="padding: 20px; background: var(--bg-dark); border-top: 1px solid var(--border); display: flex; gap: 10px;">
+                <input type="text" id="chat-input" placeholder="Type a message..." style="flex: 1; padding: 15px; border-radius: 30px; border: 1px solid var(--border); background: #0a0a0a; color: #fff; outline: none;">
+                <button id="btn-send-chat" class="btn btn-primary" style="border-radius: 50%; width: 50px; height: 50px; padding: 0;"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module" src="/src/controllers/dealerApp.js"></script>
 </body>
