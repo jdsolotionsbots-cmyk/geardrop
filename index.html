@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GearDrop | Logistics</title>
+    <title>GearDrop | Automotive Logistics</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/public/style.css">
     <style>
-        /* Premium Startup UI Overrides */
         :root {
             --primary-glow: rgba(255, 102, 0, 0.15);
             --card-bg: rgba(20, 20, 20, 0.6);
@@ -17,9 +16,10 @@
             background-color: #050505;
             color: #ffffff;
             overflow-x: hidden;
+            margin: 0;
         }
         
-        /* Subtle glowing background effect */
+        /* Background Glow */
         .ambient-glow {
             position: absolute;
             top: -20%; left: 50%; transform: translateX(-50%);
@@ -28,53 +28,116 @@
             z-index: -1; pointer-events: none;
         }
 
+        /* Navbar - INCREASED LOGO SIZE */
         .top-nav { padding: 25px 40px; display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        
+        .logo-img { height: 60px; /* Doubled the size of the logo! */ }
+
+        /* Hero Section */
         .hero { text-align: center; padding: 100px 20px 80px; max-width: 1000px; margin: 0 auto; position: relative; }
-        .hero-title { font-size: 5rem; margin-bottom: 20px; font-weight: 900; letter-spacing: -2px; line-height: 1.05; }
         
-        /* Gradient Text */
+        /* Dynamic Entrance Animations */
+        .fade-up {
+            animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-title { font-size: 5.5rem; margin-bottom: 20px; font-weight: 900; letter-spacing: -2px; line-height: 1.05; }
+        
+        /* Shimmering Gradient Text */
         .text-gradient {
-            background: linear-gradient(135deg, #FF6600 0%, #FF9900 100%);
+            background: linear-gradient(135deg, #FF6600 0%, #FF9900 50%, #FF6600 100%);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             color: transparent;
+            animation: shine 3s linear infinite;
         }
-        .hero-subtitle { color: #888; font-size: 1.25rem; margin-bottom: 60px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        .hero-subtitle { color: #888; font-size: 1.3rem; margin-bottom: 40px; max-width: 650px; margin-left: auto; margin-right: auto; line-height: 1.6; }
         
-        .action-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-top: 40px; }
-        
+        /* NEW: Moving Delivery Car Animation */
+        .car-track-container {
+            width: 100%; max-width: 400px; margin: 0 auto 50px; position: relative; height: 30px;
+        }
+        .car-track-line {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,102,0,0.5), transparent);
+        }
+        .moving-car {
+            position: absolute; bottom: -8px; left: -30px; color: #FF6600; font-size: 1.5rem;
+            animation: driveAcross 4s linear infinite;
+        }
+        /* The glowing trail behind the car */
+        .moving-car::after {
+            content: ''; position: absolute; top: 12px; right: 25px; width: 40px; height: 2px;
+            background: linear-gradient(270deg, #FF6600, transparent);
+        }
+
+        @keyframes driveAcross {
+            0% { transform: translateX(-20px); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateX(420px); opacity: 0; }
+        }
+
         /* Glassmorphism Cards */
+        .action-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-top: 40px; }
         .card { 
             background: var(--card-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             padding: 50px 40px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); 
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; text-align: left;
         }
         .card:hover { transform: translateY(-8px); border-color: rgba(255, 102, 0, 0.5); box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 40px var(--primary-glow); }
-        .card-icon-wrap { width: 60px; height: 60px; border-radius: 16px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; margin-bottom: 25px; }
-        
-        /* Modals */
+        .card-icon-wrap { width: 60px; height: 60px; border-radius: 16px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; margin-bottom: 25px; transition: transform 0.3s; }
+        .card:hover .card-icon-wrap { transform: scale(1.1) rotate(-5deg); }
+
+        /* Marketing Sections */
+        .marketing-section { padding: 80px 20px; max-width: 1100px; margin: 0 auto; border-top: 1px solid rgba(255,255,255,0.05); }
+        .section-title { font-size: 2.5rem; font-weight: 800; margin-bottom: 20px; text-align: center; }
+        .section-subtitle { color: #888; text-align: center; max-width: 700px; margin: 0 auto 50px; line-height: 1.6; font-size: 1.1rem; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .info-box { background: rgba(255,255,255,0.02); padding: 40px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); transition: transform 0.3s; }
+        .info-box:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.15); }
+        .info-box h3 { color: #FF6600; font-size: 1.5rem; margin-top: 0; margin-bottom: 15px; }
+        .info-box p { color: #aaa; line-height: 1.7; margin: 0; }
+        .feature-item { text-align: center; padding: 20px; }
+        .feature-item i { font-size: 2.5rem; color: #FF6600; margin-bottom: 20px; transition: transform 0.3s; }
+        .feature-item:hover i { transform: scale(1.2); }
+        .feature-item h3 { font-size: 1.3rem; margin-bottom: 10px; }
+        .feature-item p { color: #888; line-height: 1.5; }
+
+        /* Modals & Inputs */
         .auth-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 3000; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
         .auth-box { background: #0f0f0f; width: 90%; max-width: 420px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); padding: 40px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
         .auth-close { position: absolute; top: 20px; right: 25px; background: none; border: none; color: #666; font-size: 1.8rem; cursor: pointer; transition: color 0.2s; }
         .auth-close:hover { color: #fff; }
-        
         .auth-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 30px; }
         .auth-tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: 600; color: #666; border-bottom: 2px solid transparent; transition: all 0.2s; }
         .auth-tab.active { color: #FF6600; border-bottom: 2px solid #FF6600; }
-        
-        /* Premium Inputs */
         .auth-input { width: 100%; padding: 16px 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 12px; margin-bottom: 15px; outline: none; box-sizing: border-box; font-size: 1rem; transition: all 0.2s; }
         .auth-input:focus { border-color: #FF6600; background: rgba(255,255,255,0.05); box-shadow: 0 0 0 4px rgba(255,102,0,0.1); }
-        
+        .forgot-pass { display: block; text-align: right; color: #FF6600; font-size: 0.9rem; text-decoration: none; margin-top: -5px; margin-bottom: 20px; transition: color 0.2s; }
+        .forgot-pass:hover { color: #FF9900; text-decoration: underline; }
         .btn-premium { background: #fff; color: #000; border: none; font-weight: 700; font-size: 1.1rem; padding: 16px; border-radius: 12px; cursor: pointer; transition: transform 0.2s, background 0.2s; width: 100%; }
         .btn-premium:hover { background: #f0f0f0; transform: scale(0.98); }
         .btn-premium.brand { background: #FF6600; color: #fff; }
         .btn-premium.brand:hover { background: #e65c00; }
-        
         .hidden { display: none !important; }
-        @media (max-width: 768px) { .hero-title { font-size: 3.5rem; } .card { padding: 30px 20px; } }
+
+        @media (max-width: 768px) { .hero-title { font-size: 3.5rem; } .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -82,23 +145,28 @@
     <div class="ambient-glow"></div>
 
     <nav class="top-nav">
-        <img src="/public/logo.png" alt="GearDrop" style="height: 35px;">
+        <img src="/public/logo.png" alt="GearDrop" class="logo-img">
     </nav>
 
     <header class="hero">
-        <h1 class="hero-title">Parts. Delivered. <br><span class="text-gradient">Instantly.</span></h1>
-        <p class="hero-subtitle">The modern logistics network built exclusively for the automotive industry. Request parts or drive on your own schedule.</p>
+        <h1 class="hero-title fade-up">Parts. Delivered. <br><span class="text-gradient">Instantly.</span></h1>
+        <p class="hero-subtitle fade-up delay-1">The modern logistics network built exclusively for the automotive industry. Request parts to your bay or drive on your own schedule.</p>
         
-        <div class="action-cards">
+        <div class="car-track-container fade-up delay-1">
+            <div class="car-track-line"></div>
+            <i class="fas fa-truck-fast moving-car"></i>
+        </div>
+        
+        <div class="action-cards fade-up delay-2">
             <div class="card" id="card-open-shop">
-                <div class="card-icon-wrap"><i class="fas fa-wrench" style="font-size: 1.8rem; color: #fff;"></i></div>
+                <div class="card-icon-wrap"><i class="fas fa-warehouse" style="font-size: 1.8rem; color: #fff;"></i></div>
                 <h2 style="margin-top: 0; margin-bottom: 10px; font-size: 1.8rem;">I'm a Shop</h2>
                 <p style="color: #888; margin-bottom: 30px; line-height: 1.5;">Request instant deliveries from local dealers directly to your service bay.</p>
                 <button type="button" class="btn-premium">Login or Sign Up &rarr;</button>
             </div>
             
             <div class="card" id="card-open-driver" style="border-color: rgba(255,102,0,0.3);">
-                <div class="card-icon-wrap" style="background: rgba(255,102,0,0.1);"><i class="fas fa-car-side" style="font-size: 1.8rem; color: #FF6600;"></i></div>
+                <div class="card-icon-wrap" style="background: rgba(255,102,0,0.1);"><i class="fas fa-truck-fast" style="font-size: 1.8rem; color: #FF6600;"></i></div>
                 <h2 style="margin-top: 0; margin-bottom: 10px; font-size: 1.8rem;">I'm a Driver</h2>
                 <p style="color: #888; margin-bottom: 30px; line-height: 1.5;">Earn money delivering car parts in your city. Drive and work on your own schedule.</p>
                 <button type="button" class="btn-premium brand">Login or Sign Up &rarr;</button>
@@ -106,11 +174,50 @@
         </div>
     </header>
 
+    <section class="marketing-section">
+        <h2 class="section-title">Who We <span class="text-gradient">Are</span></h2>
+        <p class="section-subtitle">GearDrop is the premier on-demand delivery network built from the ground up specifically for the automotive parts industry. We bridge the gap between dealerships, parts suppliers, and service bays with lightning-fast, reliable logistics.</p>
+        
+        <div class="grid-2">
+            <div class="info-box">
+                <h3>Our Mission</h3>
+                <p>To eliminate bay-wait times and empower mechanics to fix cars faster by revolutionizing how auto parts move through the city. We believe a mechanic should never have to put a tool down to wait for a part.</p>
+            </div>
+            <div class="info-box">
+                <h3>Our Vision</h3>
+                <p>A fully connected automotive ecosystem where logistics is invisible, instant, and seamlessly integrated into every service bay in the country. We are building the future infrastructure of automotive repair.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="marketing-section" style="border-top: none; padding-top: 40px;">
+        <h2 class="section-title">Why Choose GearDrop?</h2>
+        <p class="section-subtitle">Stop relying on outdated, scheduled parts runs. Upgrade to on-demand.</p>
+        
+        <div class="grid-3">
+            <div class="feature-item">
+                <i class="fas fa-bolt"></i>
+                <h3>Instant Dispatch</h3>
+                <p>No more waiting for the afternoon parts truck. Request a driver instantly the second you need a part.</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-shield-check"></i>
+                <h3>Verified Network</h3>
+                <p>Every single driver on our platform is manually vetted and approved for secure, professional transit.</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-map-location-dot"></i>
+                <h3>Live Tracking</h3>
+                <p>Watch your parts move on the map in real-time and chat directly with your driver from pickup to drop-off.</p>
+            </div>
+        </div>
+    </section>
+
     <div id="shop-modal" class="auth-modal">
         <div class="auth-box">
             <button type="button" class="auth-close" id="close-shop-modal">&times;</button>
             <div style="display: flex; align-items: center; margin-bottom: 25px;">
-                <div class="card-icon-wrap" style="width: 45px; height: 45px; margin-bottom: 0; margin-right: 15px;"><i class="fas fa-wrench" style="color: #fff;"></i></div>
+                <div class="card-icon-wrap" style="width: 45px; height: 45px; margin-bottom: 0; margin-right: 15px;"><i class="fas fa-warehouse" style="color: #fff;"></i></div>
                 <h2 style="margin: 0; font-size: 1.5rem;">Shop Portal</h2>
             </div>
             
@@ -122,7 +229,8 @@
             <div id="form-shop-login">
                 <input type="email" id="shop-login-email" class="auth-input" placeholder="Email Address">
                 <input type="password" id="shop-login-password" class="auth-input" placeholder="Password">
-                <button type="button" id="btn-shop-email-login" class="btn-premium brand" style="margin-top: 10px;">Login securely</button>
+                <a href="javascript:void(0)" class="forgot-pass" id="shop-forgot-pass">Forgot Password?</a>
+                <button type="button" id="btn-shop-email-login" class="btn-premium brand">Login securely</button>
             </div>
 
             <div id="form-shop-signup" class="hidden">
@@ -140,7 +248,7 @@
         <div class="auth-box">
             <button type="button" class="auth-close" id="close-driver-modal">&times;</button>
             <div style="display: flex; align-items: center; margin-bottom: 25px;">
-                <div class="card-icon-wrap" style="width: 45px; height: 45px; margin-bottom: 0; margin-right: 15px; background: rgba(255,102,0,0.1);"><i class="fas fa-car-side" style="color: #FF6600;"></i></div>
+                <div class="card-icon-wrap" style="width: 45px; height: 45px; margin-bottom: 0; margin-right: 15px; background: rgba(255,102,0,0.1);"><i class="fas fa-truck-fast" style="color: #FF6600;"></i></div>
                 <h2 style="margin: 0; font-size: 1.5rem;">Driver Portal</h2>
             </div>
             
@@ -152,7 +260,8 @@
             <div id="form-driver-login">
                 <input type="email" id="driver-login-email" class="auth-input" placeholder="Email Address">
                 <input type="password" id="driver-login-password" class="auth-input" placeholder="Password">
-                <button type="button" id="btn-driver-email-login" class="btn-premium brand" style="margin-top: 10px;">Login securely</button>
+                <a href="javascript:void(0)" class="forgot-pass" id="driver-forgot-pass">Forgot Password?</a>
+                <button type="button" id="btn-driver-email-login" class="btn-premium brand">Login securely</button>
             </div>
 
             <div id="form-driver-signup" class="hidden">
@@ -165,7 +274,7 @@
             </div>
         </div>
     </div>
-<script type="module" src="/src/controllers/indexApp.js"></script>
-    <script type="module" src="/src/controllers/ui.js"></script>
+
+    <script type="module" src="/src/controllers/indexApp.js"></script>
 </body>
-    </html>
+</html>
