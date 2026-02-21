@@ -7,7 +7,7 @@ let currentJobId = null;
 
 // 1. Authenticate and Initialize
 checkAuthState((authData) => {
-    if (!authData || authData.role !== 'dealer') {
+    if (!authData || authData.role !== 'shop') {
         window.location.href = '/index.html'; // Kick out unauthorized users
     } else {
         initMap();
