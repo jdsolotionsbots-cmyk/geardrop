@@ -6,7 +6,10 @@
     <title>GearDrop | Automotive Logistics</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/public/style.css">
-    <style>
+   <link rel="apple-touch-icon" href="/logo.png">
+
+<link rel="icon" type="image/png" sizes="512x512" href="/logo.png">
+   <style>
         :root {
             --primary-glow: rgba(255, 102, 0, 0.15);
             --card-bg: rgba(20, 20, 20, 0.6);
@@ -145,7 +148,7 @@
     <div class="ambient-glow"></div>
 
     <nav class="top-nav">
-        <img src="/public/logo.png" alt="GearDrop" class="logo-img">
+        <img src="/logo-wide.png" alt="BOLT" class="logo-img">
     </nav>
 
     <header class="hero">
@@ -276,5 +279,36 @@
     </div>
 
     <script type="module" src="/src/controllers/indexApp.js"></script>
+<div id="install-prompt" style="display:none; position:fixed; bottom:0; left:0; width:100%; background:#0a0a0a; border-top:2px solid #FF6600; padding:25px 20px; z-index:9999; text-align:center; box-sizing:border-box; box-shadow: 0 -10px 30px rgba(0,0,0,0.8);">
+    <h3 style="margin:0 0 10px 0; color:#FF6600;"><i class="fas fa-mobile-alt"></i> Install GearDrop App</h3>
+    <p id="install-instructions" style="color:#aaa; font-size:1rem; line-height:1.5; margin-bottom: 20px;">
+        </p>
+    <button onclick="document.getElementById('install-prompt').style.display='none'" style="background:#333; color:#fff; border:none; padding:12px 20px; border-radius:10px; width:100%; font-weight:bold; cursor:pointer;">
+        I've installed it!
+    </button>
+</div>
+
+<script>
+    // 1. Check if the app is already installed (Standalone Mode)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    
+    // 2. If it's NOT installed, figure out what phone they have
+    if (!isStandalone) {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isAndroid = /Android/.test(navigator.userAgent);
+        
+        const promptBox = document.getElementById('install-prompt');
+        const textElement = document.getElementById('install-instructions');
+        
+        // 3. Show them the exact instructions for their specific phone!
+        if (isIOS) {
+            textElement.innerHTML = "Tap the <strong>Share</strong> button at the bottom of Safari, then scroll down and tap <strong>Add to Home Screen</strong>.";
+            promptBox.style.display = 'block';
+        } else if (isAndroid) {
+            textElement.innerHTML = "Tap the <strong>Menu</strong> button (3 dots) in Chrome, then tap <strong>Install App</strong> or <strong>Add to Home Screen</strong>.";
+            promptBox.style.display = 'block';
+        }
+    }
+</script>
 </body>
 </html>

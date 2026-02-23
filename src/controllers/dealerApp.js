@@ -1,176 +1,319 @@
 import { checkAuthState, logoutUser } from '../services/auth.js';
-import { db, auth } from '../config/firebase.js';
-import { collection, addDoc, onSnapshot, doc } from "firebase/firestore";
-import { initModals, openProfileModal, openChatModal } from '../services/modals.js';
+import { db, auth } from '../config/firebase.js'; 
+import { collection, addDoc, doc, getDoc, updateDoc, onSnapshot, query, where, orderBy } from "firebase/firestore";
 
 let map;
-let currentJobId = null;
+let pickupPin, dropoffPin, routeLine;
+let routeData = { pickup: null, dropoff: null, distanceKm: 0, price: 0 };
 
-// 1. Authenticate and Initialize
+// 1. App Initialization
 checkAuthState((authData) => {
-    if (!authData || authData.role !== 'shop') {
-        window.location.href = '/index.html'; // Kick out hackers
-    } else {
-        initMap();
-        // Google Maps has been completely removed! 
-    }
+    if (!authData || authData.role !== 'shop') return window.location.href = '/index.html';
+    initMap();
+    setupNavigation();
+    listenToMyOrders(); 
 });
 
-// 2. Map & UI Setup (100% Free OpenStreetMap)
 const initMap = () => {
-    if (map || !document.getElementById('map')) return;
-    map = L.map('map').setView([43.2557, -79.8711], 13); // Centered on Hamilton
-    
-    // Free beautiful dark mode map tiles
+    if (map) return;
+    map = L.map('map').setView([43.2557, -79.8711], 12); 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
     setTimeout(() => { map.invalidateSize(); }, 500); 
+
+    // Start tracking the Audi once the map is ready!
+    startLiveTracker();
 };
 
-// ==========================================
-// FREE GPS GEOLOCATION ENGINE
-// ==========================================
-const getUserLocation = async (inputElement) => {
-    inputElement.value = "Locating..."; // Tell the user we are searching
-    
-    // Ask the browser for the user's location
-    if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            
-            // Move the visual map to their location and drop a pin
-            map.setView([lat, lon], 15);
-            L.marker([lat, lon]).addTo(map);
+// 2. Tab Navigation
+const setupNavigation = () => {
+    const btnNew = document.getElementById('nav-new');
+    const btnHistory = document.getElementById('nav-history');
+    const viewNew = document.getElementById('view-new');
+    const viewHistory = document.getElementById('view-history');
 
-            // Translate GPS coordinates into a real Street Address for FREE
-            try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-                const data = await response.json();
-                
-                // Put the real address into the input box
-                inputElement.value = data.display_name; 
-                calculateMultiPrice();
-            } catch (err) {
-                // Backup plan: just paste the GPS coordinates
-                inputElement.value = `${lat}, ${lon}`; 
+    btnNew.onclick = () => {
+        btnNew.classList.add('active'); btnHistory.classList.remove('active');
+        viewNew.style.display = 'block'; viewHistory.style.display = 'none';
+        setTimeout(() => { map.invalidateSize(); }, 100); 
+    };
+    btnHistory.onclick = () => {
+        btnHistory.classList.add('active'); btnNew.classList.remove('active');
+        viewHistory.style.display = 'block'; viewNew.style.display = 'none';
+    };
+};
+
+// 3. Free Address Autocomplete (Nominatim)
+const setupAutocomplete = (inputId, resultsId, type) => {
+    const input = document.getElementById(inputId);
+    const resultsBox = document.getElementById(resultsId);
+    let timeout = null;
+
+    input.addEventListener('input', (e) => {
+        clearTimeout(timeout);
+        const query = e.target.value;
+        if (query.length < 4) { resultsBox.style.display = 'none'; return; }
+
+        timeout = setTimeout(async () => {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=5&viewbox=-80.0,43.4,-79.6,43.1&bounded=1`);
+            const data = await res.json();
+            
+            resultsBox.innerHTML = '';
+            if (data.length > 0) {
+                resultsBox.style.display = 'block';
+                data.forEach(place => {
+                    const div = document.createElement('div');
+                    div.className = 'autocomplete-item';
+                    div.innerText = place.display_name;
+                    div.onclick = () => {
+                        input.value = place.display_name;
+                        resultsBox.style.display = 'none';
+                        setMapPin(type, place.lat, place.lon, place.display_name);
+                    };
+                    resultsBox.appendChild(div);
+                });
             }
-        }, (error) => {
-            alert("Please allow location access in your browser pop-up to use this feature!");
-            inputElement.value = "";
-        });
+        }, 500);
+    });
+
+    document.addEventListener('click', (e) => {
+        if(e.target !== input) resultsBox.style.display = 'none';
+    });
+};
+
+setupAutocomplete('pickup-input', 'pickup-results', 'pickup');
+setupAutocomplete('dropoff-input', 'dropoff-results', 'dropoff');
+
+// 4. Map Pins & Distance Math
+const setMapPin = (type, lat, lon, addressName) => {
+    const coords = [parseFloat(lat), parseFloat(lon)];
+    
+    if (type === 'pickup') {
+        if (pickupPin) map.removeLayer(pickupPin);
+        pickupPin = L.marker(coords).addTo(map).bindPopup("Pickup").openPopup();
+        routeData.pickup = { address: addressName, lat: coords[0], lng: coords[1] };
     } else {
-        alert("Geolocation is not supported by your browser");
+        if (dropoffPin) map.removeLayer(dropoffPin);
+        dropoffPin = L.marker(coords).addTo(map).bindPopup("Drop-off").openPopup();
+        routeData.dropoff = { address: addressName, lat: coords[0], lng: coords[1] };
+    }
+
+    map.setView(coords, 13);
+
+    if (routeData.pickup && routeData.dropoff) {
+        if (routeLine) map.removeLayer(routeLine);
+        
+        routeLine = L.polyline([
+            [routeData.pickup.lat, routeData.pickup.lng],
+            [routeData.dropoff.lat, routeData.dropoff.lng]
+        ], { color: '#FF6600', weight: 4, dashArray: '10, 10' }).addTo(map);
+        map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
+
+        const meters = map.distance([routeData.pickup.lat, routeData.pickup.lng], [routeData.dropoff.lat, routeData.dropoff.lng]);
+        routeData.distanceKm = (meters / 1000) * 1.3; 
+
+        routeData.price = 7.50 + (routeData.distanceKm * 1.50);
+        
+        document.getElementById('route-distance').innerText = routeData.distanceKm.toFixed(1) + " km";
+        document.getElementById('live-price').innerText = "$" + routeData.price.toFixed(2);
+        
+        const btn = document.getElementById('btn-confirm-route');
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fas fa-satellite-dish"></i> Broadcast Job for $${routeData.price.toFixed(2)}`;
     }
 };
 
-// 3. Pricing Logic
-const calculateMultiPrice = () => {
-    const stops = document.querySelectorAll('.stop-address').length;
-    if (stops === 0) return;
-    const sub = 7.50 + ((stops - 1) * 3.50) + (stops * 5); // Base math from prototype
-    document.getElementById('live-price').innerText = "$" + (sub * 1.13).toFixed(2);
+// =====================================================================
+// 🟢 LIVE DRIVER TRACKER ("THE GOD VIEW") 🟢
+// =====================================================================
+const startLiveTracker = () => {
+    let driverMarker = null;
+
+    const carIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/3204/3204121.png', 
+        iconSize: [40, 40],
+        iconAnchor: [20, 20] 
+    });
+
+    console.log("Starting Live Tracker...");
+    const driverRef = doc(db, "drivers", "Audi_A5_SLine_01");
+
+    onSnapshot(driverRef, (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            const lat = data.lat;
+            const lng = data.lng;
+
+            console.log(`Live heartbeat received: ${lat}, ${lng}`);
+
+            if (!driverMarker) {
+                driverMarker = L.marker([lat, lng], { icon: carIcon }).addTo(map);
+                driverMarker.bindPopup("<b>Juan's Audi A5</b><br>Status: ON DUTY");
+            } else {
+                driverMarker.setLatLng([lat, lng]);
+            }
+        }
+    }, (error) => {
+        console.error("Firebase Tracking Error:", error);
+    });
+};
+// =====================================================================
+
+// 5. Submit Job
+document.getElementById('btn-confirm-route')?.addEventListener('click', async () => {
+    const details = document.getElementById('job-details').value;
+    if (!details) return alert("Please add the part details or Invoice number.");
+
+    try {
+        const btn = document.getElementById('btn-confirm-route');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Broadcasting...';
+        btn.disabled = true;
+
+        await addDoc(collection(db, "jobs"), {
+            dealerId: auth.currentUser.uid,
+            pickup: routeData.pickup.address,
+            dropoff: routeData.dropoff.address,
+            details: details,
+            distance: routeData.distanceKm.toFixed(1),
+            price: parseFloat(routeData.price.toFixed(2)),
+            status: 'searching',
+            time: new Date()
+        });
+        
+        document.getElementById('nav-history').click();
+        document.getElementById('job-details').value = "";
+        btn.innerHTML = `Enter addresses to calculate`;
+
+    } catch(error) { 
+        alert("Failed to submit route.");
+    }
+});
+
+// 6. Live Order Tracking
+const listenToMyOrders = () => {
+    const q = query(collection(db, "jobs"), where("dealerId", "==", auth.currentUser.uid));
+    
+    onSnapshot(q, (snapshot) => {
+        const grid = document.getElementById('shop-jobs-list');
+        if (!grid) return;
+        
+        grid.innerHTML = '';
+        if (snapshot.empty) {
+            grid.innerHTML = '<p style="color:#888;">No active routes. Go dispatch a new job!</p>';
+            return;
+        }
+
+        snapshot.forEach(doc => {
+            const job = doc.data();
+            let badgeColor = "#FF9900"; 
+            if (job.status === 'claimed') badgeColor = "#4CAF50"; 
+            if (job.status === 'completed') badgeColor = "#888"; 
+
+            grid.innerHTML += `
+                <div style="background: #111; border: 1px solid #333; padding: 20px; border-radius: 12px; border-left: 4px solid ${badgeColor};">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <strong style="color:#fff; font-size:1.1rem;">$${job.price.toFixed(2)}</strong>
+                        <span style="background:${badgeColor}22; color:${badgeColor}; border:1px solid ${badgeColor}; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase;">
+                            ${job.status}
+                        </span>
+                    </div>
+                    <div style="color:#aaa; font-size:0.9rem; margin-bottom: 8px;"><i class="fas fa-box" style="color:#888; width:20px;"></i> ${job.details || 'Part Delivery'}</div>
+                    <div style="color:#aaa; font-size:0.9rem; margin-bottom: 8px;"><i class="fas fa-arrow-up" style="color:var(--primary); width:20px;"></i> ${job.pickup || 'Unknown'}</div>
+                    <div style="color:#aaa; font-size:0.9rem;"><i class="fas fa-arrow-down" style="color:#4CAF50; width:20px;"></i> ${job.dropoff || 'Unknown'}</div>
+                    
+                    ${job.driverName ? `
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #333; color: #fff; font-size: 0.9rem;">
+                        <i class="fas fa-user-check" style="color:#4CAF50;"></i> Driver: <strong>${job.driverName}</strong>
+                        
+                        <button onclick="openChat('${doc.id}')" style="margin-top: 12px; width: 100%; background: #333; color: #fff; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                            <i class="fas fa-comment"></i> Message Driver
+                        </button>
+                    </div>` : ''}
+                </div>
+            `;
+        });
+    });
 };
 
-// 4. Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-    initModals();
-
-    document.getElementById('btn-profile')?.addEventListener('click', openProfileModal);
-
-    const chatFab = document.getElementById('chat-fab');
-    if (chatFab) {
-        chatFab.addEventListener('click', () => openChatModal(currentJobId));
-    }    
-    
-    document.getElementById('btn-logout')?.addEventListener('click', async () => {
-        await logoutUser();
-        window.location.href = '/index.html';
-    });
-
-    // Add Stop Button
-    document.getElementById('btn-add-stop')?.addEventListener('click', () => {
-        const container = document.getElementById('stops-container');
-        const count = container.children.length + 1;
-        
-        const div = document.createElement('div');
-        div.className = 'stop-entry';
-        div.style = "background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid var(--primary);";
-        
-        // Build the HTML with the new "Locate Me" button!
-        div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <small style="color:var(--primary); font-weight:bold;">STOP ${count}</small>
-                <i class="fas fa-times btn-remove-stop" style="cursor:pointer; color:#888;"></i>
-            </div>
-            <div style="display:flex; gap: 10px; margin-top:10px;">
-                <input type="text" placeholder="Type Address manually..." class="input-dark stop-address" style="flex: 1; margin:0;">
-                <button class="btn btn-primary btn-locate" style="padding: 10px; min-width: 45px; display:flex; justify-content:center; align-items:center;" title="Use My Location">
-                    <i class="fas fa-location-crosshairs"></i>
-                </button>
-            </div>
-            <input type="text" placeholder="Part Details / PO#" class="input-dark stop-details" style="margin-top:10px; width:100%; box-sizing:border-box;">
-        `;
-        
-        container.appendChild(div);
-        
-        // Remove button logic
-        div.querySelector('.btn-remove-stop').addEventListener('click', (e) => {
-            e.target.closest('.stop-entry').remove();
-            calculateMultiPrice();
-        });
-
-        // "Locate Me" GPS button logic
-        const inputField = div.querySelector('.stop-address');
-        div.querySelector('.btn-locate').addEventListener('click', (e) => {
-            e.preventDefault();
-            getUserLocation(inputField);
-        });
-
-        // Update price when typing manually
-        inputField.addEventListener('input', calculateMultiPrice);
-        
-        calculateMultiPrice();
-    });
-
-    // Submit Job to Firestore
-    document.getElementById('btn-confirm-route')?.addEventListener('click', async () => {
-        const stops = [];
-        document.querySelectorAll('.stop-entry').forEach(el => {
-            const address = el.querySelector('.stop-address').value;
-            if(address) {
-                stops.push({ 
-                    address: address, 
-                    details: el.querySelector('.stop-details').value 
-                });
-            }
-        });
-
-        if(stops.length === 0) return alert("Please add at least one stop!");
-
-        try {
-            const price = parseFloat(document.getElementById('live-price').innerText.replace('$',''));
-            const docRef = await addDoc(collection(db, "jobs"), {
-                dealerId: auth.currentUser.uid, 
-                stops: stops, 
-                price: price,
-                status: 'searching', 
-                time: new Date()
-            });
-            
-            currentJobId = docRef.id;
-            const banner = document.getElementById('order-status-banner');
-            banner.innerHTML = `<div style="background:#4CAF50; color:white; padding:15px; border-radius:8px;">Searching for Driver...</div>`;
-            
-            // Listen for driver pickup
-            onSnapshot(doc(db, "jobs", currentJobId), (snap) => {
-                const data = snap.data();
-                if (data && data.status === 'claimed') {
-                    banner.innerHTML = `<div style="background:#4CAF50; color:white; padding:15px; border-radius:8px;">Route Claimed by ${data.driverName || 'Driver'}!</div>`;
-                }
-            });
-        } catch(error) { 
-            console.error("Failed to post job:", error); 
-            alert("Failed to submit route. Check your internet connection.");
-        }
-    });
+// 7. Profile Modal Logic
+document.getElementById('btn-profile')?.addEventListener('click', async () => {
+    document.getElementById('profile-modal').style.display = 'flex';
+    const docSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+    if (docSnap.exists()) {
+        document.getElementById('prof-business').value = docSnap.data().businessName || "";
+        document.getElementById('prof-phone').value = docSnap.data().phone || "";
+    }
 });
+
+document.getElementById('btn-save-profile')?.addEventListener('click', async () => {
+    const busName = document.getElementById('prof-business').value;
+    const phone = document.getElementById('prof-phone').value;
+    await updateDoc(doc(db, "users", auth.currentUser.uid), {
+        businessName: busName,
+        phone: phone
+    });
+    alert("Profile Updated!");
+    document.getElementById('profile-modal').style.display = 'none';
+});
+
+document.getElementById('btn-logout')?.addEventListener('click', async () => {
+    await logoutUser();
+    window.location.href = '/index.html';
+});
+
+// =====================================================================
+// 🟢 DISPATCHER LIVE CHAT ENGINE 🟢
+// =====================================================================
+let currentChatJobId = null;
+let chatUnsubscribe = null;
+
+window.openChat = (jobId) => {
+    currentChatJobId = jobId;
+    const modal = document.getElementById('chat-modal');
+    if(modal) modal.style.display = 'flex';
+    
+    if (chatUnsubscribe) chatUnsubscribe(); // Clear old chats
+    
+    // Listen to the specific driver's chat folder
+    const messagesRef = collection(db, "jobs", jobId, "messages");
+    const q = query(messagesRef, orderBy("timestamp", "asc"));
+    
+    chatUnsubscribe = onSnapshot(q, (snapshot) => {
+        const box = document.getElementById('chat-messages');
+        if(!box) return;
+        box.innerHTML = '';
+        
+        snapshot.forEach(doc => {
+            const msg = doc.data();
+            const isShop = msg.sender === 'shop';
+            
+            box.innerHTML += `
+                <div style="align-self: ${isShop ? 'flex-end' : 'flex-start'}; background: ${isShop ? '#FF6600' : '#333'}; padding: 10px 15px; border-radius: 15px; color: #fff; max-width: 85%; font-size: 0.9rem;">
+                    ${msg.text}
+                </div>
+            `;
+        });
+        box.scrollTop = box.scrollHeight; // Auto-scroll to bottom
+    });
+};
+
+window.closeChat = () => {
+    const modal = document.getElementById('chat-modal');
+    if(modal) modal.style.display = 'none';
+    if (chatUnsubscribe) chatUnsubscribe();
+    currentChatJobId = null;
+};
+
+window.sendChatMessage = async () => {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text || !currentChatJobId) return;
+
+    // Send message to cloud
+    await addDoc(collection(db, "jobs", currentChatJobId, "messages"), {
+        text: text,
+        sender: "shop",
+        timestamp: new Date()
+    });
+    
+    input.value = ''; // Clear text box
+};
